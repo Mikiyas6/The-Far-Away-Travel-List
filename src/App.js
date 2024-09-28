@@ -2,12 +2,7 @@ import { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
-  const numItems = items.length;
-  let alreadyPacked = 0;
-  items.forEach((item) => {
-    if (item.packed) alreadyPacked += 1;
-  });
-  const percentage = Math.ceil((alreadyPacked / numItems) * 100);
+
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
   }
@@ -22,7 +17,12 @@ export default function App() {
 
     setItems(newItems);
   }
-
+  function handleErase(e) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete all items?"
+    );
+    if (confirmed) setItems([]);
+  }
   return (
     <div className="app">
       <Logo />
@@ -31,12 +31,9 @@ export default function App() {
         items={items}
         handlePacked={handlePacked}
         handleDeleteItem={handleDeleteItem}
+        handleErase={handleErase}
       />
-      <Stats
-        numItems={numItems}
-        alreadyPacked={alreadyPacked}
-        percentage={percentage}
-      />
+      <Stats items={items} />
     </div>
   );
 }
@@ -80,8 +77,9 @@ function Form({ handleAddItems }) {
     </form>
   );
 }
-function PackingList({ items, handleDeleteItem, handlePacked }) {
-  const [sortBy, setSortBy] = useState("packed");
+function PackingList({ items, handleDeleteItem, handlePacked, handleErase }) {
+  const [sortBy, setSortBy] = useState("input");
+
   let sortedItems;
   if (sortBy === "input") sortedItems = items;
   if (sortBy === "description")
@@ -110,7 +108,7 @@ function PackingList({ items, handleDeleteItem, handlePacked }) {
           <option value="description">Sort by description</option>
           <option value="packed">Sort by packed status</option>
         </select>
-        <button type="">Clear</button>
+        <button onClick={handleErase}>Clear</button>
       </div>
     </div>
   );
@@ -132,13 +130,20 @@ function Item({ item, key, handleDeleteItem, handlePacked }) {
     </li>
   );
 }
-function Stats({ numItems, alreadyPacked, percentage }) {
+function Stats({ items }) {
+  const numItems = items.length;
   if (numItems === 0)
     return (
       <p className="stats">
         <em>Start adding some items to your packing list 🚀 </em>
       </p>
     );
+  let alreadyPacked = 0;
+  items.forEach((item) => {
+    if (item.packed) alreadyPacked += 1;
+  });
+  const percentage = Math.ceil((alreadyPacked / numItems) * 100);
+
   return (
     <footer className="stats">
       <em>
