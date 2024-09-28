@@ -2,6 +2,12 @@ import { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
+  const numItems = items.length;
+  let alreadyPacked = 0;
+  items.forEach((item) => {
+    if (item.packed) alreadyPacked += 1;
+  });
+  const percentage = Math.ceil((alreadyPacked / numItems) * 100);
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
   }
@@ -9,12 +15,28 @@ export default function App() {
     const newItems = items.filter((item) => item.id !== id);
     setItems(newItems);
   }
+  function handlePacked(id) {
+    const newItems = items.map((item) => {
+      return item.id === id ? { ...item, packed: !item.packed } : item;
+    });
+
+    setItems(newItems);
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form handleAddItems={handleAddItems} />
-      <PackingList items={items} handleDeleteItem={handleDeleteItem} />
-      <Stats />
+      <PackingList
+        items={items}
+        handlePacked={handlePacked}
+        handleDeleteItem={handleDeleteItem}
+      />
+      <Stats
+        numItems={numItems}
+        alreadyPacked={alreadyPacked}
+        percentage={percentage}
+      />
     </div>
   );
 }
@@ -58,20 +80,49 @@ function Form({ handleAddItems }) {
     </form>
   );
 }
-function PackingList({ items, handleDeleteItem }) {
+function PackingList({ items, handleDeleteItem, handlePacked }) {
+  const [sortBy, setSortBy] = useState("packed");
+  let sortedItems;
+  if (sortBy === "input") sortedItems = items;
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
-          <Item key={item.id} item={item} handleDeleteItem={handleDeleteItem} />
+        {sortedItems.map((item) => (
+          <Item
+            key={item.id}
+            item={item}
+            handlePacked={handlePacked}
+            handleDeleteItem={handleDeleteItem}
+          />
         ))}
       </ul>
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input order</option>
+          <option value="description">Sort by description</option>
+          <option value="packed">Sort by packed status</option>
+        </select>
+        <button type="">Clear</button>
+      </div>
     </div>
   );
 }
-function Item({ item, key, handleDeleteItem }) {
+function Item({ item, key, handleDeleteItem, handlePacked }) {
   return (
     <li key={key}>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => handlePacked(item.id)}
+      />
       <span style={item.packed ? { textDecoration: "Line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
@@ -81,10 +132,21 @@ function Item({ item, key, handleDeleteItem }) {
     </li>
   );
 }
-function Stats() {
+function Stats({ numItems, alreadyPacked, percentage }) {
+  if (numItems === 0)
+    return (
+      <p className="stats">
+        <em>Start adding some items to your packing list 🚀 </em>
+      </p>
+    );
   return (
     <footer className="stats">
-      <em>💼 You have X items on your list, and you already packed X (X%)</em>
+      <em>
+        {percentage === 100
+          ? `You got everything! Ready to go ✈`
+          : `💼 You have ${numItems} items on your list, and you already packed
+            ${alreadyPacked} (${percentage}%)`}
+      </em>
     </footer>
   );
 }
