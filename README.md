@@ -6,6 +6,9 @@ Welcome to **Far Away**, a comprehensive and easy-to-use packing list applicatio
 
 ![Steps Component](./public/Far-Away.png)
 
+- Github Repo: [Github-link](https://github.com/Mikiyas6/The-Far-Away-Travel-List)
+- Live Site URL: [Page-link](https://far-away-travel-listtt.netlify.app/)
+
 ## 📦 Features
 
 ### 📝 Add Items to Your Packing List
@@ -95,7 +98,7 @@ The design philosophy of **Far Away** is to keep things simple yet functional:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/far-away.git
+   git clone https://github.com/Mikiyas6/The-Far-Away-Travel-List
    ```
 1. Install dependencies:
    ```bash
